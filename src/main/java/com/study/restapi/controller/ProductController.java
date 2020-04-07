@@ -5,10 +5,9 @@ import com.study.restapi.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,4 +38,35 @@ public class ProductController {
             return new ResponseEntity<>(product.get(), HttpStatus.OK);
         }
     }
+
+    @PostMapping("/products")
+    public ResponseEntity<Product> saveProduct(@RequestBody @Valid Product product){
+        return new ResponseEntity<>(productRepository.save(product), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable(value = "id") long id){
+        Optional<Product> product = productRepository.findById(id);
+
+        if(!product.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            productRepository.delete(product.get());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable(value = "id") long id,
+                                                 @RequestBody @Valid Product newProduct){
+        Optional<Product> product = productRepository.findById(id);
+
+        if(!product.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            newProduct.setId(product.get().getId());
+            return new ResponseEntity<Product>(productRepository.save(newProduct), HttpStatus.OK);
+        }
+    }
+
 }
